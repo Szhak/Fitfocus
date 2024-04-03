@@ -38,25 +38,29 @@ def delete_plan_in_day(user_id, day):
 def add_cpfc(user_id, protein, fat, carbohydrate, calories, gram):
     conn = sqlite3.connect("schedule.db")
     cursor = conn.cursor()
-
-    # Проверяем, существует ли пользователь в базе данных
     cursor.execute("SELECT protein, fat, carbohydrate, calories FROM user_cpfc WHERE user_id = ?", (user_id,))
     result = cursor.fetchone()
 
-    if result is not None:
-        # Расчет новых значений
+    if result is not None:  # Если за сегодня добавлял, рассчитывает кБЖУ и вносит в бд
         a = int(gram) / 100
         new_protein = result[0] + protein * a
         new_fat = result[1] + fat * a
         new_carbohydrate = result[2] + carbohydrate * a
         new_calories = result[3] + calories * a
 
-        # Обновляем данные для существующего пользователя
         cursor.execute("UPDATE user_cpfc SET protein=?, fat=?, carbohydrate=?, calories=? WHERE user_id=?",
                        (new_protein, new_fat, new_carbohydrate, new_calories, user_id))
         conn.commit()
         conn.close()
-    else:
+    else:  # Если нет, то добавляет за сегодня
+        a = int(gram) / 100
+        new_protein = int(protein) * a
+        new_fat = int(fat) * a
+        new_carbohydrate = int(carbohydrate) * a
+        new_calories = int(calories) * a
+        cursor.execute("INSERT INTO user_cpfc (user_id, protein, fat, carbohydrate, calories) VALUES (?, ?, ?, ?, ?)",
+                       (user_id, new_protein, new_fat, new_carbohydrate, new_calories))
+        conn.commit()
         conn.close()
 
 
@@ -64,7 +68,8 @@ def insert_cpfc_need(user_id, protein, fat, carbohydrate, calories):
     conn = sqlite3.connect("schedule.db")
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO user_cpfc_need (user_id, protein_need, fat_need, carbohydrate_need, calories_need) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO user_cpfc_need (user_id, protein_need, fat_need, carbohydrate_need, calories_need)"
+        " VALUES (?, ?, ?, ?, ?)",
         (user_id, protein, fat, carbohydrate, calories))
     conn.commit()
     conn.close()
@@ -165,6 +170,16 @@ def delete_user(user_id):
     cursor.execute("DELETE FROM users WHERE user_id=?", (user_id,))
     conn.commit()
     conn.close()
+
+
+def find_admin(user_id):
+    conn = sqlite3.connect("schedule.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM admin WHERE user_id=?", (user_id,))
+    admin = [row[0] for row in cursor.fetchall()]
+
+    conn.close()
+    return admin
 
 # Таблица расписаний юзера
 # weekly_schedule(название таблицы)

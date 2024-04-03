@@ -40,10 +40,6 @@ def calories(height, weight, age, gen, activ, want):
         return (a * want_dict[want]) / 100
 
 
-# protein_need
-# fat_need
-# carbohydrate_need
-
 def protein_and_fat(callories):
     return (callories * 30) / 100
 
@@ -66,10 +62,15 @@ def left_cpfc(cpfc_need, cpfc):  # Выводит сколько осталос�
 def product(name):
     list_numbers = []
     list_name = []
-
+    num = ""
     for word in name:
-        if word.replace('.', '', 1).isdigit():
-            list_numbers.append(float(word))
+        if word.replace('.', '').isdigit():
+            num += word
         else:
+            if num:
+                list_numbers.append(float(num))
+                num = ""
             list_name.append(word)
-    return [' '.join(list_name)], list_numbers
+        if num:
+            list_numbers.append(float(num))
+    return [''.join(list_name)], list_numbers
