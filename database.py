@@ -168,13 +168,8 @@ def find_candidates(user_gender, preference):
     cursor.execute("SELECT user_id FROM users WHERE gender=? AND preference=? AND partner_id IS NULL",
                    (preference, user_gender))
     result = [row[0] for row in cursor.fetchall()]
-    print(result)
     conn.close()
     return result
-
-
-print(find_candidates("Man", "Women"))
-print(find_candidates("Women", "Man"))
 
 
 def delete_user(user_id):
@@ -185,16 +180,6 @@ def delete_user(user_id):
     cursor.execute("DELETE FROM users WHERE user_id=?", (user_id,))
     conn.commit()
     conn.close()
-
-
-def find_admin(user_id):
-    conn = sqlite3.connect("schedule.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM admin WHERE user_id=?", (user_id,))
-    admin = [row[0] for row in cursor.fetchall()]
-
-    conn.close()
-    return admin
 
 # Таблица расписаний юзера
 # weekly_schedule(название таблицы)

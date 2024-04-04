@@ -6,20 +6,7 @@ import util
 Token = "6609998211:AAG1inKSYLKS4P4pN5Lmc2XuTxaSjOXmypk"  # Token Bot
 bot = telebot.TeleBot(Token)
 
-admin = 1395590859
 stopping_message = False
-
-
-@bot.message_handler(commands=['admin'])
-def admin(message):
-    user_id = message.chat.id
-    if database.find_admin(user_id):
-        markup = types.InlineKeyboardMarkup()
-        btn1 = types.InlineKeyboardButton("", callback_data="")
-        btn2 = types.InlineKeyboardButton("", callback_data="")
-        btn3 = types.InlineKeyboardButton("", callback_data="")
-        btn4 = types.InlineKeyboardButton("", callback_data="")
-        btn5 = types.InlineKeyboardButton("", callback_data="")
 
 
 @bot.message_handler(commands=['start'])
@@ -370,8 +357,6 @@ def communication_chat(chat, markup):
 
 @bot.callback_query_handler(func=lambda g: g.data == "Stop")
 def stop_talking(f):
-    global stop
-    stop = False
     user_id = f.message.chat.id
     database.delete_user(user_id)
     bot.send_message(user_id, "Вы прекратили общение\n"
