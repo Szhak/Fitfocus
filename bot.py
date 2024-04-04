@@ -3,7 +3,7 @@ from telebot import types
 import database
 import util
 
-Token = "не покажу"  # Token Bot
+Token = "не покажу "  # Token Bot
 bot = telebot.TeleBot(Token)
 
 stopping_message = False
