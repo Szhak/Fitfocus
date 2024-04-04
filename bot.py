@@ -3,7 +3,7 @@ from telebot import types
 import database
 import util
 
-Token = "6609998211:AAG1inKSYLKS4P4pN5Lmc2XuTxaSjOXmypk"  # Token Bot
+Token = "не покажу"  # Token Bot
 bot = telebot.TeleBot(Token)
 
 stopping_message = False
@@ -341,11 +341,11 @@ def find_candidates(message):
                          text="Мы вам нашли кандидата по вашим запросам\nНачните общение отправив сообщение",
                          reply_markup=markup)
         communication_chat(chat, markup)
-    # else:
-    #     bot.edit_message_text(chat_id=user_id, message_id=message.message.message_id,
-    #                           text="Похоже сейчас никого нет в онлайне,Подождем еще некоторое время, возможно,"
-    #                                " кто-то появится в онлайне и захочет пообщаться.",
-    #                           reply_markup=markup)
+    else:
+        bot.edit_message_text(chat_id=user_id, message_id=message.message.message_id,
+                              text="Похоже сейчас никого нет в онлайне,Подождем еще некоторое время, возможно,"
+                                   " кто-то появится в онлайне и захочет пообщаться.",
+                              reply_markup=markup)
 
 
 def communication_chat(chat, markup):
