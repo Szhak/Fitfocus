@@ -153,13 +153,28 @@ def add_user(user_id, gender, preference):
     conn.close()
 
 
+def insert_partner(partner, user_id):
+    conn = sqlite3.connect("schedule.db")
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET partner_id = ? WHERE user_id = ?", (partner, user_id))
+    conn.commit()
+    conn.close()
+
+
 def find_candidates(user_gender, preference):
     conn = sqlite3.connect("schedule.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT user_id FROM users WHERE gender=? AND preference=?", (preference, user_gender))
+
+    cursor.execute("SELECT user_id FROM users WHERE gender=? AND preference=? AND partner_id IS NULL",
+                   (preference, user_gender))
     result = [row[0] for row in cursor.fetchall()]
+    print(result)
     conn.close()
     return result
+
+
+print(find_candidates("Man", "Women"))
+print(find_candidates("Women", "Man"))
 
 
 def delete_user(user_id):

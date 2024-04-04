@@ -74,3 +74,5 @@ def product(name):
         if num:
             list_numbers.append(float(num))
     return [''.join(list_name)], list_numbers
+
+

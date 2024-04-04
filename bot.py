@@ -7,7 +7,7 @@ Token = "6609998211:AAG1inKSYLKS4P4pN5Lmc2XuTxaSjOXmypk"  # Token Bot
 bot = telebot.TeleBot(Token)
 
 admin = 1395590859
-stopping_message = True
+stopping_message = False
 
 
 @bot.message_handler(commands=['admin'])
@@ -24,6 +24,8 @@ def admin(message):
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    global stopping_message
+    stopping_message = False
     database.delete_user(message.chat.id)
     markup = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton("Расписание", callback_data="schedule")
@@ -306,8 +308,6 @@ def url_music(user):
         global stopping_message
         bot.reply_to(message, util.send_music(message.text))
 
-    stopping_message = False
-
 
 @bot.callback_query_handler(func=lambda talk: talk.data == "communication")
 def communication(button):
@@ -338,8 +338,8 @@ def choice_partner(message):
 def find_candidates(message):
     user_id = message.message.chat.id
     preference = message.data.replace("find_", "")
-    database.add_user(user_id, user_gender, preference)
     candidates = database.find_candidates(user_gender, preference)
+    database.add_user(user_id, user_gender, preference)
     markup = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton("Стоп", callback_data="Stop")
     markup.add(btn1)
@@ -347,26 +347,32 @@ def find_candidates(message):
                           text="Ищем вам кандидата, подождите...", reply_markup=markup)
 
     if candidates:
-        bot.edit_message_text(chat_id=user_id, message_id=message.message.message_id,
-                              text="Мы вам нашли кандидата по вашим запросам\nНачните общение отправив сообщение",
-                              reply_markup=markup)
-        communication_user(candidates[0], markup)
-    else:
-        bot.edit_message_text(chat_id=user_id, message_id=message.message.message_id,
-                              text="Похоже сейчас никого нет в онлайне,Подождем еще некоторое время, возможно,"
-                                   " кто-то появится в онлайне и захочет пообщаться.",
-                              reply_markup=markup)
+        database.insert_partner(candidates[0], user_id)
+        database.insert_partner(user_id, candidates[0])
+        chat = [user_id, candidates[0]]
+        bot.send_message(user_id and candidates[0],
+                         text="Мы вам нашли кандидата по вашим запросам\nНачните общение отправив сообщение",
+                         reply_markup=markup)
+        communication_chat(chat, markup)
+    # else:
+    #     bot.edit_message_text(chat_id=user_id, message_id=message.message.message_id,
+    #                           text="Похоже сейчас никого нет в онлайне,Подождем еще некоторое время, возможно,"
+    #                                " кто-то появится в онлайне и захочет пообщаться.",
+    #                           reply_markup=markup)
 
 
-def communication_user(candidate_id, markup):
+def communication_chat(chat, markup):
     @bot.message_handler(content_types=["text"])
     def handle_message(message):
-        bot.send_message(candidate_id, message.text, reply_markup=markup)
+        for i in chat:
+            bot.send_message(i, message.text, reply_markup=markup)
 
 
-@bot.callback_query_handler(func=lambda stop: stop.data == "Stop")
-def stop_talking(stop):
-    user_id = stop.message.chat.id
+@bot.callback_query_handler(func=lambda g: g.data == "Stop")
+def stop_talking(f):
+    global stop
+    stop = False
+    user_id = f.message.chat.id
     database.delete_user(user_id)
     bot.send_message(user_id, "Вы прекратили общение\n"
                               "Нажмите на /start чтобы вернуться в главное меню")
